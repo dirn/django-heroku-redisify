@@ -23,7 +23,7 @@ settings.update(
     long_description=open('README.rst').read(),
     author='Andy Dirnberger',
     author_email='dirn@dirnonline.com',
-    url='https://github.com/dirn/django-heroku-redisify.py',
+    url='https://github.com/dirn/django-heroku-redisify',
     py_modules=['redisify'],
     package_data={'': ['LICENSE']},
     include_package_data=True,
