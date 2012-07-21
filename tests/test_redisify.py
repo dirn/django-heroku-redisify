@@ -25,9 +25,9 @@ class RedisifyTest(unittest.TestCase):
         parsed = _parse(self.localhost)
 
         self.assertEqual(parsed['HOST'], 'localhost')
-        self.assertIsNone(parsed['USER'])
-        self.assertIsNone(parsed['PASSWORD'])
-        self.assertIsNone(parsed['PORT'])
+        self.assertTrue(parsed['USER'] is None)
+        self.assertTrue(parsed['PASSWORD'] is None)
+        self.assertTrue(parsed['PORT'] is None)
 
     def test__parse_redistogo(self):
         """Test the internal parser with REDISTOGO_URL"""
@@ -49,13 +49,13 @@ class RedisifyTest(unittest.TestCase):
         caches = redisify(default=self.localhost)
 
         self.assertEqual(caches['LOCATION'], 'localhost')
-        self.assertIsNone(caches['OPTIONS']['PASSWORD'])
+        self.assertTrue(caches['OPTIONS']['PASSWORD'] is None)
 
     def test_no_default(self):
         """Test passing no default value"""
         caches = redisify()
 
-        self.assertIsNone(caches)
+        self.assertTrue(caches is None)
 
     def test_parser_class(self):
         """Test the PARSER_CLASS setting"""
