@@ -14,7 +14,7 @@ Usage
 Place this code into your project's settings.py::
 
     from redisify import redisify
-    CACHES = redisify(default='redis://localhost')
+    CACHES = {'default': redisify(default='redis://localhost')}
 
 Full documentation can be found on `Read the Docs`_.
 

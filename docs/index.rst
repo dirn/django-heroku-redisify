@@ -19,7 +19,7 @@ Usage
 In settings.py::
 
     from redisify import redisify
-    CACHES = redisify(default='redis://localhost')
+    CACHES = {'default': redisify(default='redis://localhost')}
 
 .. automodule:: redisify
    :members:
