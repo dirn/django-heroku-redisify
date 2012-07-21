@@ -16,6 +16,11 @@ Inspired by the work of `Randall Degges`_.
 Usage
 -----
 
+In settings.py::
+
+    from redisify import redisify
+    CACHES = redisify()
+
 .. automodule:: redisify
    :members:
 
