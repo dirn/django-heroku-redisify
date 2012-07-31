@@ -34,7 +34,8 @@ def redisify(default=None):
 
         redisify(default='redis://localhost')
 
-    .. versionadded:: 0.1.0
+    .. versionchanged:: 0.2.0
+       Added support for openredis
     """
     url = None
     # If any of the supported URL environment variables exist, use the first
