@@ -11,8 +11,9 @@ except ImportError:
 
 urlparse.uses_netloc.append('redis')
 
-REDIS_URLS = dict(
-    REDISTOGO_URL='REDISTOGO_URL',
+REDIS_URLS = (
+    'REDISTOGO_URL',
+    'OPENREDIS_URL',
 )
 
 
@@ -27,6 +28,7 @@ def redisify(default=None):
     Supported providers:
 
     - Redis To Go (REDISTOGO_URL)
+    - openredis (OPENREDIS_URL)
 
     Other Redis hosts can be utilized by passing the URL as ``default``::
 
