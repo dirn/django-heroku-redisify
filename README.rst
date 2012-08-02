@@ -2,6 +2,8 @@
 django-heroku-redisify: Friendly Redis for Django on Heroku
 ===========================================================
 
+.. image:: https://secure.travis-ci.org/dirn/django-heroku-redisify.png?branch=master
+
 A user-friendly method to configure Django projects on Heroku to use Redis.
 
 Inspired by the work of `Randall Degges`_.

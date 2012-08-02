@@ -1,8 +1,6 @@
 django-heroku-redisify 0.2.0
 ===================================
 
-.. image:: https://secure.travis-ci.org/dirn/django-heroku-redisify.png?branch=master
-
 django-heroku-redisify provides a user-friendly method to configure Django
 projects on Heroku to use Redis.
 
