@@ -4,6 +4,11 @@ python:
   - 2.7
   - 3.1
   - 3.2
+env:
+  -
+  - REDISTOGO_URL='redis://dummy'
+  - OPENREDIS_URL='redis://dummy'
+  - REDISTOGO_URL='redis://dummy1' OPENREDIS_URL='redis://dummy2'
 install:
   - pip install nose
   - pip install .
