@@ -23,6 +23,31 @@ class RedisifyTest(unittest.TestCase):
         self.redistogo = \
             'redis://redistogo:password@example.redistogo.com:6379'
 
+        # If the provider URLs already exist in the environment,
+        # back them up and delete them.
+        if 'OPENREDIS_URL' in os.environ:
+            self.OPENREDIS_URL = os.environ['OPENREDIS_URL']
+            del os.environ['OPENREDIS_URL']
+        else:
+            self.OPENREDIS_URL = None
+        if 'REDISTOGO_URL' in os.environ:
+            self.REDISTOGO_URL = os.environ['REDISTOGO_URL']
+            del os.environ['REDISTOGO_URL']
+        else:
+            self.REDISTOGO_URL = None
+
+    def tearDown(self):
+        # Restore any provider URLs to the environment or remove any
+        # temporary ones left over from testing.
+        if self.OPENREDIS_URL is not None:
+            os.environ['OPENREDIS_URL'] = self.OPENREDIS_URL
+        elif 'OPENREDIS_URL' in os.environ:
+            del os.environ['OPENREDIS_URL']
+        if self.REDISTOGO_URL is not None:
+            os.environ['REDISTOGO_URL'] = self.REDISTOGO_URL
+        elif 'REDISTOGO_URL' in os.environ:
+            del os.environ['REDISTOGO_URL']
+
     def test__parse_localhost(self):
         """Test the internal parser with localhost"""
         parsed = _parse(self.localhost)
@@ -58,101 +83,31 @@ class RedisifyTest(unittest.TestCase):
 
     def test_default(self):
         """Test passing a default value"""
-        if 'REDISTOGO_URL' in os.environ:
-            tmp1 = os.environ['REDISTOGO_URL']
-            del os.environ['REDISTOGO_URL']
-        else:
-            tmp1 = None
-        if 'OPENREDIS_URL' in os.environ:
-            tmp2 = os.environ['OPENREDIS_URL']
-            del os.environ['OPENREDIS_URL']
-        else:
-            tmp2 = None
-
         caches = redisify(default=self.localhost)
-
-        # Make sure to clean up the settings
-        if tmp1 is not None:
-            os.environ['REDISTOGO_URL'] = tmp1
-        if tmp2 is not None:
-            os.environ['OPENREDIS_URL'] = tmp2
 
         self.assertEqual(caches['LOCATION'], 'localhost')
         self.assertTrue(caches['OPTIONS']['PASSWORD'] is None)
 
     def test_no_default(self):
         """Test passing no default value"""
-        if 'REDISTOGO_URL' in os.environ:
-            tmp1 = os.environ['REDISTOGO_URL']
-            del os.environ['REDISTOGO_URL']
-        else:
-            tmp1 = None
-        if 'OPENREDIS_URL' in os.environ:
-            tmp2 = os.environ['OPENREDIS_URL']
-            del os.environ['OPENREDIS_URL']
-        else:
-            tmp2 = None
-
         caches = redisify()
-
-        # Make sure to clean up the settings
-        if tmp1 is not None:
-            os.environ['REDISTOGO_URL'] = tmp1
-        if tmp2 is not None:
-            os.environ['OPENREDIS_URL'] = tmp2
 
         self.assertTrue(caches is None)
 
     def test_openredis(self):
         """Test using OPENREDIS_URL"""
-        if 'REDISTOGO_URL' in os.environ:
-            tmp1 = os.environ['REDISTOGO_URL']
-            del os.environ['REDISTOGO_URL']
-        else:
-            tmp1 = None
-        if 'OPENREDIS_URL' in os.environ:
-            tmp2 = os.environ['OPENREDIS_URL']
-        else:
-            tmp2 = None
-
         os.environ['OPENREDIS_URL'] = self.openredis
 
         caches = redisify()
-
-        # Make sure to clean up the settings
-        if tmp1 is not None:
-            os.environ['REDISTOGO_URL'] = tmp1
-        if tmp2 is None:
-            del os.environ['OPENREDIS_URL']
-        else:
-            os.environ['OPENREDIS_URL'] = tmp2
 
         self.assertEqual(caches['LOCATION'], 'example.openredis.com:63792')
         self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password2')
 
     def test_openredis_trumps_default(self):
         """Test using OPENREDIS_URL with a default"""
-        if 'REDISTOGO_URL' in os.environ:
-            tmp1 = os.environ['REDISTOGO_URL']
-            del os.environ['REDISTOGO_URL']
-        else:
-            tmp1 = None
-        if 'OPENREDIS_URL' in os.environ:
-            tmp2 = os.environ['OPENREDIS_URL']
-        else:
-            tmp2 = None
-
         os.environ['OPENREDIS_URL'] = self.openredis
 
         caches = redisify(default=self.localhost)
-
-        # Make sure to clean up the settings
-        if tmp1 is not None:
-            os.environ['REDISTOGO_URL'] = tmp1
-        if tmp2 is None:
-            del os.environ['OPENREDIS_URL']
-        else:
-            os.environ['OPENREDIS_URL'] = tmp2
 
         self.assertEqual(caches['LOCATION'], 'example.openredis.com:63792')
         self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password2')
@@ -166,79 +121,28 @@ class RedisifyTest(unittest.TestCase):
 
     def test_redistogo(self):
         """Test using REDISTOGO_URL"""
-        if 'REDISTOGO_URL' in os.environ:
-            tmp1 = os.environ['REDISTOGO_URL']
-        else:
-            tmp1 = None
-        if 'OPENREDIS_URL' in os.environ:
-            tmp2 = os.environ['OPENREDIS_URL']
-            del os.environ['OPENREDIS_URL']
-        else:
-            tmp2 = None
-
         os.environ['REDISTOGO_URL'] = self.redistogo
 
         caches = redisify()
-
-        # Make sure to clean up the settings
-        if tmp1 is None:
-            del os.environ['REDISTOGO_URL']
-        else:
-            os.environ['REDISTOGO_URL'] = tmp1
-        if tmp2 is not None:
-            os.environ['OPENREDIS_URL'] = tmp2
 
         self.assertEqual(caches['LOCATION'], 'example.redistogo.com:6379')
         self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password')
 
     def test_redistogo_trumps_all(self):
         """Test with all possibilities set"""
-        if 'REDISTOGO_URL' in os.environ:
-            tmp1 = os.environ['REDISTOGO_URL']
-        else:
-            tmp1 = None
-        if 'OPENREDIS_URL' in os.environ:
-            tmp2 = os.environ['OPENREDIS_URL']
-        else:
-            tmp2 = None
-
         os.environ['REDISTOGO_URL'] = self.redistogo
         os.environ['OPENREDIS_URL'] = self.openredis
 
         caches = redisify()
-
-        # Make sure to clean up the settings
-        if tmp1 is not None:
-            os.environ['REDISTOGO_URL'] = tmp1
-        if tmp2 is not None:
-            os.environ['OPENREDIS_URL'] = tmp2
 
         self.assertEqual(caches['LOCATION'], 'example.redistogo.com:6379')
         self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password')
 
     def test_redistogo_trumps_default(self):
         """Test using REDISTOGO_URL with a default"""
-        if 'REDISTOGO_URL' in os.environ:
-            tmp1 = os.environ['REDISTOGO_URL']
-        else:
-            tmp1 = None
-        if 'OPENREDIS_URL' in os.environ:
-            tmp2 = os.environ['OPENREDIS_URL']
-            del os.environ['OPENREDIS_URL']
-        else:
-            tmp2 = None
-
         os.environ['REDISTOGO_URL'] = self.redistogo
 
         caches = redisify(default=self.localhost)
-
-        # Make sure to clean up the settings
-        if tmp1 is None:
-            del os.environ['REDISTOGO_URL']
-        else:
-            os.environ['REDISTOGO_URL'] = tmp1
-        if tmp2 is not None:
-            os.environ['OPENREDIS_URL'] = tmp2
 
         self.assertEqual(caches['LOCATION'], 'example.redistogo.com:6379')
         self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password')
