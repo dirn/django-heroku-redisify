@@ -27,6 +27,7 @@ settings.update(
     py_modules=['redisify'],
     package_data={'': ['LICENSE']},
     include_package_data=True,
+    tests_require=['coverage', 'nose'],
     license=open('LICENSE').read(),
     classifiers=(
         'Development Status :: 5 - Production/Stable',
