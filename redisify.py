@@ -14,6 +14,7 @@ urlparse.uses_netloc.append('redis')
 REDIS_URLS = (
     'REDISTOGO_URL',
     'OPENREDIS_URL',
+    'REDISGREEN_URL',
 )
 
 
@@ -29,6 +30,7 @@ def redisify(default=None):
 
     - Redis To Go (REDISTOGO_URL)
     - openredis (OPENREDIS_URL)
+    - RedisGreen (REDISGREEN_URL)
 
     Other Redis hosts can be utilized by passing the URL as ``default``::
 

@@ -19,6 +19,10 @@ class RedisifyTest(unittest.TestCase):
         # URL for openredis
         self.openredis = \
             'redis://openredis:password2@example.openredis.com:63792'
+        # URL for RedisGreen
+        self.redisgreen = \
+            'redis://rg:gnysfn55t65g72ntd4g0a6h8ea91ca9v@' \
+            'smart-panda.redisgreen.net:10030'
         # URL for Redis To Go
         self.redistogo = \
             'redis://redistogo:password@example.redistogo.com:6379'
@@ -30,6 +34,11 @@ class RedisifyTest(unittest.TestCase):
             del os.environ['OPENREDIS_URL']
         else:
             self.OPENREDIS_URL = None
+        if 'REDISGREEN_URL' in os.environ:
+            self.REDISGREEN_URL = os.environ['REDISGREEN_URL']
+            del os.environ['REDISGREEN_URL']
+        else:
+            self.REDISGREEN_URL = None
         if 'REDISTOGO_URL' in os.environ:
             self.REDISTOGO_URL = os.environ['REDISTOGO_URL']
             del os.environ['REDISTOGO_URL']
@@ -43,6 +52,10 @@ class RedisifyTest(unittest.TestCase):
             os.environ['OPENREDIS_URL'] = self.OPENREDIS_URL
         elif 'OPENREDIS_URL' in os.environ:
             del os.environ['OPENREDIS_URL']
+        if self.REDISGREEN_URL is not None:
+            os.environ['REDISGREEN_URL'] = self.REDISGREEN_URL
+        elif 'REDISGREEN_URL' in os.environ:
+            del os.environ['REDISGREEN_URL']
         if self.REDISTOGO_URL is not None:
             os.environ['REDISTOGO_URL'] = self.REDISTOGO_URL
         elif 'REDISTOGO_URL' in os.environ:
@@ -65,6 +78,15 @@ class RedisifyTest(unittest.TestCase):
         self.assertEqual(parsed['USER'], 'openredis')
         self.assertEqual(parsed['PASSWORD'], 'password2')
         self.assertEqual(parsed['PORT'], 63792)
+
+    def test__parse_redisgreen(self):
+        """Test the internal parser with REDISGREEN_URL"""
+        parsed = _parse(self.redisgreen)
+
+        self.assertEqual(parsed['HOST'], 'smart-panda.redisgreen.net')
+        self.assertEqual(parsed['USER'], 'rg')
+        self.assertEqual(parsed['PASSWORD'], 'gnysfn55t65g72ntd4g0a6h8ea91ca9v')
+        self.assertEqual(parsed['PORT'], 10030)
 
     def test__parse_redistogo(self):
         """Test the internal parser with REDISTOGO_URL"""
@@ -119,6 +141,28 @@ class RedisifyTest(unittest.TestCase):
         self.assertEqual(caches['OPTIONS']['PARSER_CLASS'],
             'redis.connection.HiredisParser')
 
+    def test_redisgreen(self):
+        """Test using REDISGREEN_URL"""
+        os.environ['REDISGREEN_URL'] = self.redisgreen
+
+        caches = redisify()
+
+        self.assertEqual(caches['LOCATION'],
+                         'smart-panda.redisgreen.net:10030')
+        self.assertEqual(caches['OPTIONS']['PASSWORD'],
+                         'gnysfn55t65g72ntd4g0a6h8ea91ca9v')
+
+    def test_redisgreen_trumps_default(self):
+        """Test using REDISGREEN_URL with a default"""
+        os.environ['REDISGREEN_URL'] = self.redisgreen
+
+        caches = redisify(default=self.localhost)
+
+        self.assertEqual(caches['LOCATION'],
+                         'smart-panda.redisgreen.net:10030')
+        self.assertEqual(caches['OPTIONS']['PASSWORD'],
+                         'gnysfn55t65g72ntd4g0a6h8ea91ca9v')
+
     def test_redistogo(self):
         """Test using REDISTOGO_URL"""
         os.environ['REDISTOGO_URL'] = self.redistogo
@@ -132,6 +176,7 @@ class RedisifyTest(unittest.TestCase):
         """Test with all possibilities set"""
         os.environ['REDISTOGO_URL'] = self.redistogo
         os.environ['OPENREDIS_URL'] = self.openredis
+        os.environ['REDISGREEN_URL'] = self.redisgreen
 
         caches = redisify()
 
