@@ -61,7 +61,7 @@ def redisify(default=None, db=0):
         # based on those recommended by Heroku.
         url = _parse(url)
         return dict(
-            BACKEND='redis_cache.RedisCache',
+            BACKEND='redis_cache.cache.RedisCache',
             LOCATION='{0}:{1}:{2}'.format(url['HOST'], url['PORT'], db),
             OPTIONS=dict(
                 PARSER_CLASS='redis.connection.HiredisParser',
