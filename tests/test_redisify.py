@@ -16,6 +16,9 @@ class RedisifyTest(unittest.TestCase):
     def setUp(self):
         # URL for localhost
         self.localhost = 'redis://localhost'
+        # URL for MyRedis
+        self.myredis = \
+            'redis://myredis:abcdef123456@example.ec2.myredis.com:6123/'
         # URL for openredis
         self.openredis = \
             'redis://openredis:password2@example.openredis.com:63792'
@@ -29,6 +32,11 @@ class RedisifyTest(unittest.TestCase):
 
         # If the provider URLs already exist in the environment,
         # back them up and delete them.
+        if 'MYREDIS_URL' in os.environ:
+            self.MYREDIS_URL = os.environ['MYREDIS_URL']
+            del os.environ['MYREDIS_URL']
+        else:
+            self.MYREDIS_URL = None
         if 'OPENREDIS_URL' in os.environ:
             self.OPENREDIS_URL = os.environ['OPENREDIS_URL']
             del os.environ['OPENREDIS_URL']
@@ -48,6 +56,10 @@ class RedisifyTest(unittest.TestCase):
     def tearDown(self):
         # Restore any provider URLs to the environment or remove any
         # temporary ones left over from testing.
+        if self.MYREDIS_URL is not None:
+            os.environ['MYREDIS_URL'] = self.MYREDIS_URL
+        elif 'MYREDIS_URL' in os.environ:
+            del os.environ['MYREDIS_URL']
         if self.OPENREDIS_URL is not None:
             os.environ['OPENREDIS_URL'] = self.OPENREDIS_URL
         elif 'OPENREDIS_URL' in os.environ:
@@ -69,6 +81,15 @@ class RedisifyTest(unittest.TestCase):
         self.assertTrue(parsed['USER'] is None)
         self.assertTrue(parsed['PASSWORD'] is None)
         self.assertTrue(parsed['PORT'] is None)
+
+    def test__parse_myredis(self):
+        """Test the internal parser with MYREDIS_URL"""
+        parsed = _parse(self.myredis)
+
+        self.assertEqual(parsed['HOST'], 'example.ec2.myredis.com')
+        self.assertEqual(parsed['USER'], 'myredis')
+        self.assertEqual(parsed['PASSWORD'], 'abcdef123456')
+        self.assertEqual(parsed['PORT'], 6123)
 
     def test__parse_openredis(self):
         """Test the internal parser with OPENREDIS_URL"""
@@ -115,6 +136,24 @@ class RedisifyTest(unittest.TestCase):
         caches = redisify()
 
         self.assertTrue(caches is None)
+
+    def test_myredis(self):
+        """Test using MYREDIS_URL"""
+        os.environ['MYREDIS_URL'] = self.myredis
+
+        caches = redisify()
+
+        self.assertEqual(caches['LOCATION'], 'example.ec2.myredis.com:6123')
+        self.assertEqual(caches['OPTIONS']['PASSWORD'], 'abcdef123456')
+
+    def test_myredis_trumps_default(self):
+        """Test using MYREDIS_URL with a default"""
+        os.environ['MYREDIS_URL'] = self.myredis
+
+        caches = redisify(default=self.localhost)
+
+        self.assertEqual(caches['LOCATION'], 'example.ec2.myredis.com:6123')
+        self.assertEqual(caches['OPTIONS']['PASSWORD'], 'abcdef123456')
 
     def test_openredis(self):
         """Test using OPENREDIS_URL"""
@@ -177,6 +216,7 @@ class RedisifyTest(unittest.TestCase):
         os.environ['REDISTOGO_URL'] = self.redistogo
         os.environ['OPENREDIS_URL'] = self.openredis
         os.environ['REDISGREEN_URL'] = self.redisgreen
+        os.environ['MYREDIS_URL'] = self.myredis
 
         caches = redisify()
 

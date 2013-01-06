@@ -15,6 +15,7 @@ REDIS_URLS = (
     'REDISTOGO_URL',
     'OPENREDIS_URL',
     'REDISGREEN_URL',
+    'MYREDIS_URL',
 )
 
 
@@ -31,6 +32,7 @@ def redisify(default=None):
     - Redis To Go (REDISTOGO_URL)
     - openredis (OPENREDIS_URL)
     - RedisGreen (REDISGREEN_URL)
+    - MyRedis (MYREDIS_URL)
 
     Other Redis hosts can be utilized by passing the URL as ``default``::
 
