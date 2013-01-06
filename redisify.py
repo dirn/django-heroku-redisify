@@ -15,14 +15,17 @@ REDIS_URLS = (
     'REDISTOGO_URL',
     'OPENREDIS_URL',
     'REDISGREEN_URL',
+    'REDISCLOUD_URL',
 )
 
 
-def redisify(default=None):
+def redisify(default=None, db=0):
     """Returns configured CACHES dictionary based on environment settings.
 
     :param default: A URL for a Redis database.
     :type default: str.
+    :param db: The db to use
+    :type default: int.
     :returns: dict -- A configured dictionary that can be used for
               django.conf.settings.CACHES.
 
@@ -31,6 +34,7 @@ def redisify(default=None):
     - Redis To Go (REDISTOGO_URL)
     - openredis (OPENREDIS_URL)
     - RedisGreen (REDISGREEN_URL)
+    - RedisCloud (REDISCLOUD_URL)
 
     Other Redis hosts can be utilized by passing the URL as ``default``::
 
@@ -59,7 +63,7 @@ def redisify(default=None):
             LOCATION='{0}{1}'.format(url['HOST'],
                 ':{0}'.format(url['PORT']) if url['PORT'] is not None else ''),
             OPTIONS=dict(
-                DB=0,
+                DB=db,
                 PARSER_CLASS='redis.connection.HiredisParser',
                 PASSWORD=url['PASSWORD'],
             )

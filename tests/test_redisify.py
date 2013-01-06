@@ -26,6 +26,9 @@ class RedisifyTest(unittest.TestCase):
         # URL for Redis To Go
         self.redistogo = \
             'redis://redistogo:password@example.redistogo.com:6379'
+        # URL for Redis Cloud
+        self.rediscloud = \
+            'redis://rediscloud:cloudpwd@redis-example.garantiadata.com:16000'
 
         # If the provider URLs already exist in the environment,
         # back them up and delete them.
@@ -44,6 +47,11 @@ class RedisifyTest(unittest.TestCase):
             del os.environ['REDISTOGO_URL']
         else:
             self.REDISTOGO_URL = None
+        if 'REDISCLOUD_URL' in os.environ:
+            self.REDISCLOUD_URL = os.environ['REDISCLOUD_URL']
+            del os.environ['REDISCLOUD_URL']
+        else:
+            self.REDISCLOUD_URL = None
 
     def tearDown(self):
         # Restore any provider URLs to the environment or remove any
@@ -60,6 +68,10 @@ class RedisifyTest(unittest.TestCase):
             os.environ['REDISTOGO_URL'] = self.REDISTOGO_URL
         elif 'REDISTOGO_URL' in os.environ:
             del os.environ['REDISTOGO_URL']
+        if self.REDISCLOUD_URL is not None:
+            os.environ['REDISCLOUD_URL'] = self.REDISCLOUD_URL
+        elif 'REDISCLOUD_URL' in os.environ:
+            del os.environ['REDISCLOUD_URL']
 
     def test__parse_localhost(self):
         """Test the internal parser with localhost"""
@@ -96,6 +108,15 @@ class RedisifyTest(unittest.TestCase):
         self.assertEqual(parsed['USER'], 'redistogo')
         self.assertEqual(parsed['PASSWORD'], 'password')
         self.assertEqual(parsed['PORT'], 6379)
+
+    def test__parse_rediscloud(self):
+        """Test the internal parser with REDISCLOUD_URL"""
+        parsed = _parse(self.rediscloud)
+
+        self.assertEqual(parsed['HOST'], 'redis-example.garantiadata.com')
+        self.assertEqual(parsed['USER'], 'rediscloud')
+        self.assertEqual(parsed['PASSWORD'], 'cloudpwd')
+        self.assertEqual(parsed['PORT'], 16000)
 
     def test_backend(self):
         """Test the BACKEND setting"""
@@ -174,9 +195,11 @@ class RedisifyTest(unittest.TestCase):
 
     def test_redistogo_trumps_all(self):
         """Test with all possibilities set"""
+        #this should really test that redisfy.REDIS_URLS[0] trumps all
         os.environ['REDISTOGO_URL'] = self.redistogo
         os.environ['OPENREDIS_URL'] = self.openredis
         os.environ['REDISGREEN_URL'] = self.redisgreen
+        os.environ['REDISCLOUD_URL'] = self.rediscloud
 
         caches = redisify()
 
@@ -191,6 +214,28 @@ class RedisifyTest(unittest.TestCase):
 
         self.assertEqual(caches['LOCATION'], 'example.redistogo.com:6379')
         self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password')
+
+    def test_rediscloud(self):
+        """Test using REDISCLOUD_URL"""
+        os.environ['REDISCLOUD_URL'] = self.rediscloud
+
+        caches = redisify()
+
+        self.assertEqual(caches['LOCATION'],
+                         'redis-example.garantiadata.com:16000')
+        self.assertEqual(caches['OPTIONS']['PASSWORD'],
+                         'cloudpwd')
+
+    def test_rediscloud_trumps_default(self):
+        """Test using REDISCLOUD_URL with a default"""
+        os.environ['REDISCLOUD_URL'] = self.rediscloud
+
+        caches = redisify(default=self.localhost)
+
+        self.assertEqual(caches['LOCATION'],
+                         'redis-example.garantiadata.com:16000')
+        self.assertEqual(caches['OPTIONS']['PASSWORD'],
+                         'cloudpwd')
 
 if __name__ == '__main__':
     unittest.main()
