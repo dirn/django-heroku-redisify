@@ -60,10 +60,8 @@ def redisify(default=None, db=0):
         url = _parse(url)
         return dict(
             BACKEND='redis_cache.RedisCache',
-            LOCATION='{0}{1}'.format(url['HOST'],
-                ':{0}'.format(url['PORT']) if url['PORT'] is not None else ''),
+            LOCATION='{0}:{1}:{2}'.format(url['HOST'], url['PORT'], db),
             OPTIONS=dict(
-                DB=db,
                 PARSER_CLASS='redis.connection.HiredisParser',
                 PASSWORD=url['PASSWORD'],
             )
@@ -78,5 +76,5 @@ def _parse(url):
         HOST=url.hostname,
         USER=url.username,
         PASSWORD=url.password,
-        PORT=url.port,
+        PORT=url.port if url.port else 6379,
     )

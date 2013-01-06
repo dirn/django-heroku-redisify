@@ -80,7 +80,7 @@ class RedisifyTest(unittest.TestCase):
         self.assertEqual(parsed['HOST'], 'localhost')
         self.assertTrue(parsed['USER'] is None)
         self.assertTrue(parsed['PASSWORD'] is None)
-        self.assertTrue(parsed['PORT'] is None)
+        self.assertEqual(parsed['PORT'], 6379)
 
     def test__parse_openredis(self):
         """Test the internal parser with OPENREDIS_URL"""
@@ -128,7 +128,7 @@ class RedisifyTest(unittest.TestCase):
         """Test passing a default value"""
         caches = redisify(default=self.localhost)
 
-        self.assertEqual(caches['LOCATION'], 'localhost')
+        self.assertEqual(caches['LOCATION'], 'localhost:6379:0')
         self.assertTrue(caches['OPTIONS']['PASSWORD'] is None)
 
     def test_no_default(self):
@@ -143,7 +143,7 @@ class RedisifyTest(unittest.TestCase):
 
         caches = redisify()
 
-        self.assertEqual(caches['LOCATION'], 'example.openredis.com:63792')
+        self.assertEqual(caches['LOCATION'], 'example.openredis.com:63792:0')
         self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password2')
 
     def test_openredis_trumps_default(self):
@@ -152,7 +152,7 @@ class RedisifyTest(unittest.TestCase):
 
         caches = redisify(default=self.localhost)
 
-        self.assertEqual(caches['LOCATION'], 'example.openredis.com:63792')
+        self.assertEqual(caches['LOCATION'], 'example.openredis.com:63792:0')
         self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password2')
 
     def test_parser_class(self):
@@ -169,7 +169,7 @@ class RedisifyTest(unittest.TestCase):
         caches = redisify()
 
         self.assertEqual(caches['LOCATION'],
-                         'smart-panda.redisgreen.net:10030')
+                         'smart-panda.redisgreen.net:10030:0')
         self.assertEqual(caches['OPTIONS']['PASSWORD'],
                          'gnysfn55t65g72ntd4g0a6h8ea91ca9v')
 
@@ -180,7 +180,7 @@ class RedisifyTest(unittest.TestCase):
         caches = redisify(default=self.localhost)
 
         self.assertEqual(caches['LOCATION'],
-                         'smart-panda.redisgreen.net:10030')
+                         'smart-panda.redisgreen.net:10030:0')
         self.assertEqual(caches['OPTIONS']['PASSWORD'],
                          'gnysfn55t65g72ntd4g0a6h8ea91ca9v')
 
@@ -190,7 +190,7 @@ class RedisifyTest(unittest.TestCase):
 
         caches = redisify()
 
-        self.assertEqual(caches['LOCATION'], 'example.redistogo.com:6379')
+        self.assertEqual(caches['LOCATION'], 'example.redistogo.com:6379:0')
         self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password')
 
     def test_redistogo_trumps_all(self):
@@ -203,7 +203,7 @@ class RedisifyTest(unittest.TestCase):
 
         caches = redisify()
 
-        self.assertEqual(caches['LOCATION'], 'example.redistogo.com:6379')
+        self.assertEqual(caches['LOCATION'], 'example.redistogo.com:6379:0')
         self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password')
 
     def test_redistogo_trumps_default(self):
@@ -212,7 +212,7 @@ class RedisifyTest(unittest.TestCase):
 
         caches = redisify(default=self.localhost)
 
-        self.assertEqual(caches['LOCATION'], 'example.redistogo.com:6379')
+        self.assertEqual(caches['LOCATION'], 'example.redistogo.com:6379:0')
         self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password')
 
     def test_rediscloud(self):
@@ -222,7 +222,7 @@ class RedisifyTest(unittest.TestCase):
         caches = redisify()
 
         self.assertEqual(caches['LOCATION'],
-                         'redis-example.garantiadata.com:16000')
+                         'redis-example.garantiadata.com:16000:0')
         self.assertEqual(caches['OPTIONS']['PASSWORD'],
                          'cloudpwd')
 
@@ -233,7 +233,7 @@ class RedisifyTest(unittest.TestCase):
         caches = redisify(default=self.localhost)
 
         self.assertEqual(caches['LOCATION'],
-                         'redis-example.garantiadata.com:16000')
+                         'redis-example.garantiadata.com:16000:0')
         self.assertEqual(caches['OPTIONS']['PASSWORD'],
                          'cloudpwd')
 
