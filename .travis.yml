@@ -6,6 +6,6 @@ python:
   - 3.3
   - pypy
 install:
-  - pip install -r rests/requirements.txt
+  - pip install -r tests/requirements.txt
   - pip install .
 script: nosetests -q tests
