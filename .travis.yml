@@ -5,12 +5,7 @@ python:
   - 3.2
   - 3.3
   - pypy
-env:
-  -
-  - REDISTOGO_URL='redis://dummy'
-  - OPENREDIS_URL='redis://dummy'
-  - REDISTOGO_URL='redis://dummy1' OPENREDIS_URL='redis://dummy2'
 install:
-  - pip install nose
+  - pip install -r rests/requirements.txt
   - pip install .
 script: nosetests -q tests

@@ -10,25 +10,45 @@ Inspired by the work of `Randall Degges`_.
 
 .. _Randall Degges: https://github.com/rdegges
 
+
 Usage
 =====
 
 Place this code into your project's settings.py::
 
     from redisify import redisify
-    CACHES = {'default': redisify(default='redis://localhost')}
+    CACHES = redisify(default='redis://localhost')
 
 Full documentation can be found on `Read the Docs`_.
 
 .. _Read the Docs: http://readthedocs.org/docs/django-heroku-redisify/en/latest/
 
+
 Installation
 ============
 
-Installing django-heroku-redisify is easy::
+To install the latest version of django-heroku-redisify::
 
-    pip install django-heroku-redisify
+    $ pip install django-heroku-redisify
 
-or download the source and run::
+or, if you must::
 
-    python setup.py install
+    $ easy_install django-heroku-redisify
+
+To install the latest development version::
+
+    $ git clone git@github.com:dirn/django-heroku-redisify.git
+    $ cd django-heroku-redisify
+    $ python setup.py install
+
+
+Changelog
+=========
+
+- 0.2.0
+  - THIS RELEASE IS NOT BACKWARDS COMPATIBLE
+  - ``redisify()`` now returns a ``dict`` of all URLs found in the
+  environment settings.
+
+- 0.1.0
+  - Initial release

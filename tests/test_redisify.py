@@ -4,278 +4,94 @@
 import unittest
 
 import os
-import sys
 
 from redisify import redisify, _parse
-
-sys.path.insert(0, os.path.abspath('..'))
-sys.path.append('.')
 
 
 class RedisifyTest(unittest.TestCase):
     def setUp(self):
-        # URL for localhost
-        self.localhost = 'redis://localhost'
-        # URL for MyRedis
-        self.myredis = \
-            'redis://myredis:abcdef123456@example.ec2.myredis.com:6123/'
-        # URL for openredis
-        self.openredis = \
-            'redis://openredis:password2@example.openredis.com:63792'
-        # URL for RedisGreen
-        self.redisgreen = \
-            'redis://rg:gnysfn55t65g72ntd4g0a6h8ea91ca9v@' \
-            'smart-panda.redisgreen.net:10030'
-        # URL for Redis To Go
-        self.redistogo = \
-            'redis://redistogo:password@example.redistogo.com:6379'
-        # URL for Redis Cloud
-        self.rediscloud = \
-            'redis://rediscloud:cloudpwd@redis-example.garantiadata.com:16000'
+        os.environ.pop('REDIS_URL', None)
+        os.environ.pop('OTHER_REDIS_URL', None)
+        os.environ.pop('ANOTHER_REDIS_URI', None)
 
-        # If the provider URLs already exist in the environment,
-        # back them up and delete them.
-        if 'MYREDIS_URL' in os.environ:
-            self.MYREDIS_URL = os.environ['MYREDIS_URL']
-            del os.environ['MYREDIS_URL']
-        else:
-            self.MYREDIS_URL = None
-        if 'OPENREDIS_URL' in os.environ:
-            self.OPENREDIS_URL = os.environ['OPENREDIS_URL']
-            del os.environ['OPENREDIS_URL']
-        else:
-            self.OPENREDIS_URL = None
-        if 'REDISGREEN_URL' in os.environ:
-            self.REDISGREEN_URL = os.environ['REDISGREEN_URL']
-            del os.environ['REDISGREEN_URL']
-        else:
-            self.REDISGREEN_URL = None
-        if 'REDISTOGO_URL' in os.environ:
-            self.REDISTOGO_URL = os.environ['REDISTOGO_URL']
-            del os.environ['REDISTOGO_URL']
-        else:
-            self.REDISTOGO_URL = None
-        if 'REDISCLOUD_URL' in os.environ:
-            self.REDISCLOUD_URL = os.environ['REDISCLOUD_URL']
-            del os.environ['REDISCLOUD_URL']
-        else:
-            self.REDISCLOUD_URL = None
+    def test_all(self):
+        """Test all settings"""
 
-    def tearDown(self):
-        # Restore any provider URLs to the environment or remove any
-        # temporary ones left over from testing.
-        if self.MYREDIS_URL is not None:
-            os.environ['MYREDIS_URL'] = self.MYREDIS_URL
-        elif 'MYREDIS_URL' in os.environ:
-            del os.environ['MYREDIS_URL']
-        if self.OPENREDIS_URL is not None:
-            os.environ['OPENREDIS_URL'] = self.OPENREDIS_URL
-        elif 'OPENREDIS_URL' in os.environ:
-            del os.environ['OPENREDIS_URL']
-        if self.REDISGREEN_URL is not None:
-            os.environ['REDISGREEN_URL'] = self.REDISGREEN_URL
-        elif 'REDISGREEN_URL' in os.environ:
-            del os.environ['REDISGREEN_URL']
-        if self.REDISTOGO_URL is not None:
-            os.environ['REDISTOGO_URL'] = self.REDISTOGO_URL
-        elif 'REDISTOGO_URL' in os.environ:
-            del os.environ['REDISTOGO_URL']
-        if self.REDISCLOUD_URL is not None:
-            os.environ['REDISCLOUD_URL'] = self.REDISCLOUD_URL
-        elif 'REDISCLOUD_URL' in os.environ:
-            del os.environ['REDISCLOUD_URL']
+        os.environ['REDIS_URL'] = 'redis://localhost/1'
+        os.environ['OTHER_REDIS_URL'] = 'redis://localhost/2'
 
-    def test__parse_localhost(self):
-        """Test the internal parser with localhost"""
-        parsed = _parse(self.localhost)
+        caches = redisify(default='redis://localhost')
 
-        self.assertEqual(parsed['HOST'], 'localhost')
-        self.assertTrue(parsed['USER'] is None)
-        self.assertTrue(parsed['PASSWORD'] is None)
-        self.assertEqual(parsed['PORT'], 6379)
+        self.assertEqual(caches['default']['LOCATION'], 'localhost:6379')
+        self.assertEqual(caches['OTHER_REDIS']['LOCATION'], 'localhost:6379')
 
-    def test__parse_myredis(self):
-        """Test the internal parser with MYREDIS_URL"""
-        parsed = _parse(self.myredis)
-
-        self.assertEqual(parsed['HOST'], 'example.ec2.myredis.com')
-        self.assertEqual(parsed['USER'], 'myredis')
-        self.assertEqual(parsed['PASSWORD'], 'abcdef123456')
-        self.assertEqual(parsed['PORT'], 6123)
-
-    def test__parse_openredis(self):
-        """Test the internal parser with OPENREDIS_URL"""
-        parsed = _parse(self.openredis)
-
-        self.assertEqual(parsed['HOST'], 'example.openredis.com')
-        self.assertEqual(parsed['USER'], 'openredis')
-        self.assertEqual(parsed['PASSWORD'], 'password2')
-        self.assertEqual(parsed['PORT'], 63792)
-
-    def test__parse_redisgreen(self):
-        """Test the internal parser with REDISGREEN_URL"""
-        parsed = _parse(self.redisgreen)
-
-        self.assertEqual(parsed['HOST'], 'smart-panda.redisgreen.net')
-        self.assertEqual(parsed['USER'], 'rg')
-        self.assertEqual(parsed['PASSWORD'], 'gnysfn55t65g72ntd4g0a6h8ea91ca9v')
-        self.assertEqual(parsed['PORT'], 10030)
-
-    def test__parse_redistogo(self):
-        """Test the internal parser with REDISTOGO_URL"""
-        parsed = _parse(self.redistogo)
-
-        self.assertEqual(parsed['HOST'], 'example.redistogo.com')
-        self.assertEqual(parsed['USER'], 'redistogo')
-        self.assertEqual(parsed['PASSWORD'], 'password')
-        self.assertEqual(parsed['PORT'], 6379)
-
-    def test__parse_rediscloud(self):
-        """Test the internal parser with REDISCLOUD_URL"""
-        parsed = _parse(self.rediscloud)
-
-        self.assertEqual(parsed['HOST'], 'redis-example.garantiadata.com')
-        self.assertEqual(parsed['USER'], 'rediscloud')
-        self.assertEqual(parsed['PASSWORD'], 'cloudpwd')
-        self.assertEqual(parsed['PORT'], 16000)
-
-    def test_backend(self):
-        """Test the BACKEND setting"""
-        caches = redisify(default=self.localhost)
-
-        self.assertEqual(caches['BACKEND'], 'redis_cache.RedisCache')
+        self.assertEqual(caches['default']['OPTIONS']['DB'], 1)
+        self.assertEqual(caches['OTHER_REDIS']['OPTIONS']['DB'], 2)
 
     def test_default(self):
         """Test passing a default value"""
-        caches = redisify(default=self.localhost)
 
-        self.assertEqual(caches['LOCATION'], 'localhost:6379:0')
-        self.assertTrue(caches['OPTIONS']['PASSWORD'] is None)
+        caches = redisify(default='redis://localhost')
 
-    def test_no_default(self):
-        """Test passing no default value"""
-        caches = redisify()
+        self.assertEqual(caches['default']['LOCATION'], 'localhost:6379')
+        self.assertEqual(caches['default']['OPTIONS']['DB'], 0)
 
-        self.assertTrue(caches is None)
-
-    def test_myredis(self):
-        """Test using MYREDIS_URL"""
-        os.environ['MYREDIS_URL'] = self.myredis
+    def test_none(self):
+        """Test no values at all"""
 
         caches = redisify()
 
-        self.assertEqual(caches['LOCATION'], 'example.ec2.myredis.com:6123')
-        self.assertEqual(caches['OPTIONS']['PASSWORD'], 'abcdef123456')
+        self.assertEqual(caches, {})
 
-    def test_myredis_trumps_default(self):
-        """Test using MYREDIS_URL with a default"""
-        os.environ['MYREDIS_URL'] = self.myredis
+    def test_others(self):
+        """Test other environment settings"""
 
-        caches = redisify(default=self.localhost)
-
-        self.assertEqual(caches['LOCATION'], 'example.ec2.myredis.com:6123')
-        self.assertEqual(caches['OPTIONS']['PASSWORD'], 'abcdef123456')
-
-    def test_openredis(self):
-        """Test using OPENREDIS_URL"""
-        os.environ['OPENREDIS_URL'] = self.openredis
+        os.environ['OTHER_REDIS_URL'] = 'redis://localhost/1'
+        os.environ['ANOTHER_REDIS_URI'] = 'redis://localhost/2'
 
         caches = redisify()
 
-        self.assertEqual(caches['LOCATION'], 'example.openredis.com:63792:0')
-        self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password2')
+        self.assertTrue('default' in caches)
 
-    def test_openredis_trumps_default(self):
-        """Test using OPENREDIS_URL with a default"""
-        os.environ['OPENREDIS_URL'] = self.openredis
+        self.assertTrue(caches['default'] == caches['OTHER_REDIS'] or
+                        caches['default'] == caches['ANOTHER_REDIS'])
 
-        caches = redisify(default=self.localhost)
+        self.assertEqual(caches['OTHER_REDIS']['LOCATION'], 'localhost:6379')
+        self.assertEqual(caches['ANOTHER_REDIS']['LOCATION'], 'localhost:6379')
 
-        self.assertEqual(caches['LOCATION'], 'example.openredis.com:63792:0')
-        self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password2')
+        self.assertEqual(caches['OTHER_REDIS']['OPTIONS']['DB'], 1)
+        self.assertEqual(caches['ANOTHER_REDIS']['OPTIONS']['DB'], 2)
 
-    def test_parser_class(self):
-        """Test the PARSER_CLASS setting"""
-        caches = redisify(default=self.localhost)
+    def test_redis_url(self):
+        """Test `REDIS_URL` setting"""
 
-        self.assertEqual(caches['OPTIONS']['PARSER_CLASS'],
-            'redis.connection.HiredisParser')
+        os.environ['REDIS_URL'] = 'redis://localhost/1'
 
-    def test_redisgreen(self):
-        """Test using REDISGREEN_URL"""
-        os.environ['REDISGREEN_URL'] = self.redisgreen
+        caches = redisify(default='redis://localhost')
 
-        caches = redisify()
+        self.assertEqual(caches['default']['LOCATION'], 'localhost:6379')
+        self.assertEqual(caches['default']['OPTIONS']['DB'], 1)
 
-        self.assertEqual(caches['LOCATION'],
-                         'smart-panda.redisgreen.net:10030:0')
-        self.assertEqual(caches['OPTIONS']['PASSWORD'],
-                         'gnysfn55t65g72ntd4g0a6h8ea91ca9v')
+    def test_settings(self):
+        """Test settings.CACHES"""
 
-    def test_redisgreen_trumps_default(self):
-        """Test using REDISGREEN_URL with a default"""
-        os.environ['REDISGREEN_URL'] = self.redisgreen
+        caches = redisify(default='redis://username:password@hostname:1234/5')
 
-        caches = redisify(default=self.localhost)
+        self.assertEqual(caches['default']['BACKEND'], 'redis_cache.RedisCache')
+        self.assertEqual(caches['default']['LOCATION'], 'hostname:1234')
 
-        self.assertEqual(caches['LOCATION'],
-                         'smart-panda.redisgreen.net:10030:0')
-        self.assertEqual(caches['OPTIONS']['PASSWORD'],
-                         'gnysfn55t65g72ntd4g0a6h8ea91ca9v')
+        self.assertEqual(caches['default']['OPTIONS']['DB'], 5)
+        self.assertEqual(caches['default']['OPTIONS']['PARSER_CLASS'],
+                         'redis.connection.HiredisParser')
+        self.assertEqual(caches['default']['OPTIONS']['PASSWORD'], 'password')
 
-    def test_redistogo(self):
-        """Test using REDISTOGO_URL"""
-        os.environ['REDISTOGO_URL'] = self.redistogo
+    def test__parse(self):
+        """Test the `_parse()` method"""
 
-        caches = redisify()
+        parsed = _parse('redis://username:password@hostname.com:1234/5')
 
-        self.assertEqual(caches['LOCATION'], 'example.redistogo.com:6379:0')
-        self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password')
-
-    def test_redistogo_trumps_all(self):
-        """Test with all possibilities set"""
-        #this should really test that redisfy.REDIS_URLS[0] trumps all
-        os.environ['REDISTOGO_URL'] = self.redistogo
-        os.environ['OPENREDIS_URL'] = self.openredis
-        os.environ['REDISGREEN_URL'] = self.redisgreen
-        os.environ['MYREDIS_URL'] = self.myredis
-        os.environ['REDISCLOUD_URL'] = self.rediscloud
-
-        caches = redisify()
-
-        self.assertEqual(caches['LOCATION'], 'example.redistogo.com:6379:0')
-        self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password')
-
-    def test_redistogo_trumps_default(self):
-        """Test using REDISTOGO_URL with a default"""
-        os.environ['REDISTOGO_URL'] = self.redistogo
-
-        caches = redisify(default=self.localhost)
-
-        self.assertEqual(caches['LOCATION'], 'example.redistogo.com:6379:0')
-        self.assertEqual(caches['OPTIONS']['PASSWORD'], 'password')
-
-    def test_rediscloud(self):
-        """Test using REDISCLOUD_URL"""
-        os.environ['REDISCLOUD_URL'] = self.rediscloud
-
-        caches = redisify()
-
-        self.assertEqual(caches['LOCATION'],
-                         'redis-example.garantiadata.com:16000:0')
-        self.assertEqual(caches['OPTIONS']['PASSWORD'],
-                         'cloudpwd')
-
-    def test_rediscloud_trumps_default(self):
-        """Test using REDISCLOUD_URL with a default"""
-        os.environ['REDISCLOUD_URL'] = self.rediscloud
-
-        caches = redisify(default=self.localhost)
-
-        self.assertEqual(caches['LOCATION'],
-                         'redis-example.garantiadata.com:16000:0')
-        self.assertEqual(caches['OPTIONS']['PASSWORD'],
-                         'cloudpwd')
-
-if __name__ == '__main__':
-    unittest.main()
+        self.assertEqual(parsed['HOST'], 'hostname.com')
+        self.assertEqual(parsed['USERNAME'], 'username')
+        self.assertEqual(parsed['PASSWORD'], 'password')
+        self.assertEqual(parsed['PORT'], 1234)
+        self.assertEqual(parsed['DB'], 5)
