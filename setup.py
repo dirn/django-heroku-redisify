@@ -29,7 +29,7 @@ settings.update(
     include_package_data=True,
     tests_require=['coverage', 'nose'],
     license=open('LICENSE').read(),
-    classifiers=(
+    classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
@@ -43,7 +43,7 @@ settings.update(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries :: Python Modules',
-    ),
+    ],
 )
 
 setup(**settings)
