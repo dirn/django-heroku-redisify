@@ -18,7 +18,7 @@ if sys.argv[-1] == 'publish':
 
 settings.update(
     name='django-heroku-redisify',
-    version='0.2.0',
+    version='0.2.1',
     description='Friendly Redis for Django on Heroku',
     long_description=open('README.rst').read(),
     author='Andy Dirnberger',
@@ -27,6 +27,7 @@ settings.update(
     py_modules=['redisify'],
     package_data={'': ['LICENSE']},
     include_package_data=True,
+    install_requires=['django-redis-cache'],
     tests_require=['coverage', 'nose'],
     license=open('LICENSE').read(),
     classifiers=[
