@@ -18,7 +18,7 @@ if sys.argv[-1] == 'publish':
 
 settings.update(
     name='django-heroku-redisify',
-    version='0.2.1',
+    version='0.3.0',
     description='Friendly Redis for Django on Heroku',
     long_description=open('README.rst').read(),
     author='Andy Dirnberger',
