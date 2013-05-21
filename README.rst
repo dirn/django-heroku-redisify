@@ -49,9 +49,9 @@ Changelog
   - Add `django-redis-cache` and `redis` as requirements.
 
 - 0.2.0
-  - THIS RELEASE IS NOT BACKWARDS COMPATIBLE
-  - ``redisify()`` now returns a ``dict`` of all URLs found in the
-  environment settings.
+    - THIS RELEASE IS NOT BACKWARDS COMPATIBLE
+    - ``redisify()`` now returns a ``dict`` of all URLs found in the
+      environment settings.
 
 - 0.1.0
   - Initial release
