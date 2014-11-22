@@ -13,14 +13,6 @@ __all__ = ('redisify')
 
 urlparse.uses_netloc.append('redis')
 
-REDIS_URLS = (
-    'REDISTOGO_URL',
-    'OPENREDIS_URL',
-    'REDISGREEN_URL',
-    'MYREDIS_URL',
-    'REDISCLOUD_URL',
-)
-
 
 def redisify(default=None):
     """Returns configured CACHES dictionary based on environment settings.
